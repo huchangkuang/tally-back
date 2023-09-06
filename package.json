@@ -1,0 +1,29 @@
+{
+  "name": "tally-back",
+  "version": "1.0.0",
+  "description": "记账项目后端",
+  "main": "index.ts",
+  "author": "huchangying <603021137@qq.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.ts",
+    "prettier": "prettier --write \"./**/*.ts*\""
+  },
+  "dependencies": {
+    "koa": "^2.14.2",
+    "koa-bodyparser": "^4.4.1",
+    "koa-convert": "^2.0.0",
+    "koa-logger": "^3.2.1",
+    "koa-router": "^12.0.0",
+    "koa-static": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.8",
+    "@types/koa-bodyparser": "^4.3.10",
+    "@types/koa-router": "^7.4.4",
+    "@types/koa-static": "^4.0.2",
+    "@types/node": "^20.5.9",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3"
+  }
+}
