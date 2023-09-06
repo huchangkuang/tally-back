@@ -9,6 +9,17 @@
     "start": "nodemon index.ts",
     "prettier": "prettier --write \"./**/*.ts*\""
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
   "dependencies": {
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
@@ -24,6 +35,8 @@
     "@types/koa-static": "^4.0.2",
     "@types/node": "^20.5.9",
     "nodemon": "^3.0.1",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "husky": "^4.3.8",
+    "lint-staged": "^13.1.0"
   }
 }
