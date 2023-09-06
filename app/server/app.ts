@@ -2,7 +2,8 @@ import Koa from "koa";
 import path from "path";
 import bodyParser from "koa-bodyparser";
 import koaStatic from "koa-static";
-import routers from '../routers/index'
+import routers from "../routers/index";
+import { Server } from "http";
 
 const app = new Koa();
 
@@ -16,10 +17,10 @@ app.use(bodyParser());
 app.use(koaStatic(path.join(__dirname, "./../static")));
 
 // 初始化路由中间件
-app.use(routers.routes()).use(routers.allowedMethods())
+app.use(routers.routes()).use(routers.allowedMethods());
 
-const run = (port: number) => {
-  app.listen(port, () => {
+const run = (port: number): Server => {
+  return app.listen(port, () => {
     console.log(`监听端口：${port}成功`);
   });
 };
