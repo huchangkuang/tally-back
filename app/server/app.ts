@@ -6,8 +6,11 @@ import bodyParser from "koa-bodyparser";
 import koaStatic from "koa-static";
 import routers from "../routers/index";
 import { Server } from "http";
+import initDb from "../db";
 
 const app = new Koa();
+
+initDb();
 
 // 配置控制台日志中间件
 // app.use(koaLogger())

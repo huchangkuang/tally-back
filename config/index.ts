@@ -1,8 +1,20 @@
 const config = {
+  db: {
+    host: "127.0.0.1",
+    username: "root",
+    password: "Qingzhou@123",
+  },
   log4js: {
     //设置追加器
     appenders: {
       console: { type: "console" }, //追加器1
+      sql: {
+        //追加器3
+        type: "dateFile",
+        filename: "logs/sql",
+        pattern: "yyyy-MM-dd.log",
+        alwaysIncludePattern: true, // 设置文件名称为 filename + pattern
+      },
       info: {
         //追加器2
         type: "file",
@@ -19,6 +31,10 @@ const config = {
     //指定哪些追加器可以输出来
     categories: {
       default: { appenders: ["console"], level: "debug" },
+      sql: {
+        appenders: ["info", "console"],
+        level: "info",
+      },
       info: {
         appenders: ["info", "console"],
         level: "info",

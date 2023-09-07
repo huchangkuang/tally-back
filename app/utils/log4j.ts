@@ -18,6 +18,12 @@ const debug = (content: string) => {
   logger.debug(content);
 };
 
+const sqlInfo = (content: string) => {
+  let logger = log4js.getLogger("sql");
+  logger.level = levels.info;
+  logger.info(content);
+};
+
 const info = (content: string) => {
   let logger = log4js.getLogger("info");
   logger.level = levels.info;
@@ -29,4 +35,4 @@ const error = (content: string) => {
   logger.level = levels.error;
   logger.error(content);
 };
-export { debug, info, error };
+export { debug, info, error, sqlInfo };
