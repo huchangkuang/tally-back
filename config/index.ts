@@ -1,8 +1,8 @@
 const config = {
   db: {
-    host: "127.0.0.1",
-    username: "root",
-    password: "Qingzhou@123",
+    host: process.env.DB_HOST,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
   },
   log4js: {
     //设置追加器

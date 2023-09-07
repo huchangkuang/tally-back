@@ -16,7 +16,9 @@ initDb();
 // app.use(koaLogger())
 
 // 配置ctx.body解析中间件
-app.use(bodyParser());
+// app.use(bodyParser());
+
+app.use(accessLog);
 
 // 配置静态资源加载中间件
 app.use(koaStatic(path.join(__dirname, "./../static")));
