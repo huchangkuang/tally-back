@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import Koa from "koa";
 import path from "path";
 import bodyParser from "koa-bodyparser";

@@ -1,4 +1,5 @@
 import Router from "koa-router";
+import { error } from "../utils/log4j";
 
 const routers = new Router();
 routers
@@ -12,6 +13,7 @@ routers
       data: "login",
     };
     ctx.res.statusCode = 200;
+    error("errorTest");
   });
 
 export default routers;
