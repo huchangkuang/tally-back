@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+dotenv.config();
 import Koa from "koa";
 import path from "path";
 import bodyParser from "koa-bodyparser";
@@ -8,15 +9,13 @@ import { Server } from "http";
 import initDb from "../db";
 import accessLog from "../middleware/accessLog";
 
-dotenv.config();
-
 const app = new Koa();
 
 // 配置控制台日志中间件
 // app.use(koaLogger())
 
 // 配置ctx.body解析中间件
-// app.use(bodyParser());
+app.use(bodyParser());
 
 app.use(accessLog);
 
