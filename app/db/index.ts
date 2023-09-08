@@ -3,7 +3,7 @@ import config from "../../config";
 import { sqlInfo } from "../utils/log4j";
 
 const { db } = config;
-export const sequelize = new Sequelize("test_db", db.username, db.password, {
+export const sequelize = new Sequelize(db.database, db.username, db.password, {
   host: db.host,
   dialect: "mysql",
   logging: (sql) => sqlInfo(sql),

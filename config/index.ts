@@ -1,7 +1,9 @@
 const config = {
+  serverPort: 3456,
   db: {
-    host: process.env.DB_HOST,
-    username: process.env.DB_USERNAME,
+    database: "test_db",
+    host: "127.0.0.1",
+    username: "root",
     password: process.env.DB_PASSWORD,
   },
   log4js: {
