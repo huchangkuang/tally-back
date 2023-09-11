@@ -11,9 +11,6 @@ import accessLog from "../middleware/accessLog";
 
 const app = new Koa();
 
-// 配置控制台日志中间件
-// app.use(koaLogger())
-
 // 配置ctx.body解析中间件
 app.use(bodyParser());
 
