@@ -3,12 +3,9 @@ import { error } from "../utils/log4j";
 import User from "../model/userModel";
 
 const routers = new Router();
-type LoginBody = {
-  userName: string;
-  password: string;
-};
+
 routers.post("/login", async (ctx) => {
-  const { userName, password } = ctx.request.body as LoginBody;
+  const { userName, password } = ctx.request.body;
   try {
     const res = await User.findOne({
       where: {

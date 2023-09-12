@@ -1,21 +1,20 @@
 import { Sequelize } from "sequelize";
 import config from "../../config";
+import mysql from "mysql2";
 import { sqlInfo } from "../utils/log4j";
+import { dbQuery } from "./utils";
 
 const { db } = config;
-export const sequelize = new Sequelize(db.database, db.username, db.password, {
+
+export const pool = mysql.createPool({
   host: db.host,
-  dialect: "mysql",
-  logging: (sql) => sqlInfo(sql),
-  define: {
-    freezeTableName: true,
-  },
+  user: db.username,
+  password: db.password,
+  database: db.database,
 });
 
 const initDb = async () => {
   try {
-    await sequelize.authenticate();
-    await sequelize.sync();
     console.log("Connection has been established successfully.");
   } catch (e) {
     console.log(e);
