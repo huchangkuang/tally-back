@@ -1,16 +1,19 @@
 import Router from "koa-router";
 import { dbQuery } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
-import { errorRule } from "../utils/errorRule";
-import { getToken, jwtSign, jwtVerify } from "../utils/jwtValidate";
-import { genPassword } from "../utils/genPassword";
+import { getToken, jwtVerify } from "../utils/jwtValidate";
 
 const routers = new Router();
 
 routers
   .get("/", async (ctx) => {
-    const { name } = (ctx.request as any).body;
-    // const tags = await dbQuery<{ name: string }[]>(sql.tagNames)
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    const tags = await dbQuery<{ name: string }[]>(
+      `select name from tags where userId=${id};`,
+    );
+    ctx.body = successRes(tags);
+    ctx.res.statusCode = 200;
   })
   .post("/add", async (ctx) => {
     const token = getToken(ctx.header);
