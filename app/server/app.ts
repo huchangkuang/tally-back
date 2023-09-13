@@ -8,6 +8,8 @@ import routers from "../routers/index";
 import { Server } from "http";
 import initDb from "../db";
 import accessLog from "../middleware/accessLog";
+import authorityControl from "../middleware/authotiryControl";
+import { errorLog } from "../utils/log4j";
 
 const app = new Koa();
 
@@ -15,12 +17,16 @@ const app = new Koa();
 app.use(bodyParser());
 
 app.use(accessLog);
+app.use(authorityControl);
 
 // 配置静态资源加载中间件
 app.use(koaStatic(path.join(__dirname, "./../static")));
 
 // 初始化路由中间件
 app.use(routers.routes()).use(routers.allowedMethods());
+(app as any).on("error", (err) => {
+  errorLog(JSON.stringify(err));
+});
 
 initDb();
 
