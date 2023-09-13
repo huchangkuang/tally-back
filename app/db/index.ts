@@ -1,8 +1,8 @@
-import { Sequelize } from "sequelize";
 import config from "../../config";
 import mysql from "mysql2";
-import { sqlInfo } from "../utils/log4j";
-import { dbQuery } from "./utils";
+import walkFile from "../utils/walkFIle";
+import path from "path";
+import { runSqlScript } from "./utils";
 
 const { db } = config;
 
@@ -15,6 +15,8 @@ export const pool = mysql.createPool({
 
 const initDb = async () => {
   try {
+    const files = await walkFile(path.resolve(__dirname, "sql"));
+    runSqlScript(files);
     console.log("Connection has been established successfully.");
   } catch (e) {
     console.log(e);

@@ -1,34 +1,35 @@
 import { pool } from "./index";
+import { errorLog } from "../utils/log4j";
+import fs from "fs";
+import { FileDirItem } from "../utils/walkFIle";
 
 export const dbQuery = <T>(sql: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, connection) => {
       if (err) {
-        reject(err);
+        errorLog(
+          `errno:${err.errno}|path:${err.path}|code:${err.code}|message:${err.message}`,
+        );
       }
-      connection.query(sql, (error, result: T) => {
+      (connection as any).query(sql, (error, result: T) => {
         if (error) {
           reject(error);
         } else {
           resolve(result);
+          connection.release();
         }
       });
     });
   });
 };
 
-export const createTable = async (
-  tableName: string,
-  value: Record<string, string>,
-  primaryKey?: string,
-) => {
-  const valueStr = Object.entries(value)
-    .map((i) => i.join(" "))
-    .join(",");
-  try {
-    await dbQuery(`create tables if not exists ${tableName} (
-      ${valueStr}
-      ${primaryKey ? `,PRIMARY KEY (${primaryKey})` : ""}
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-  } catch (e) {}
+export const runSqlScript = (files: FileDirItem[]) => {
+  files.forEach((i) => {
+    if (i.child) {
+      runSqlScript(i.child);
+    } else {
+      const content = fs.readFileSync(i.path);
+      dbQuery(content.toString());
+    }
+  });
 };

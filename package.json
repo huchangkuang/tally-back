@@ -23,6 +23,7 @@
   },
   "jest": {},
   "dependencies": {
+    "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
     "koa-convert": "^2.0.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/koa": "^2.13.8",
     "@types/koa-bodyparser": "^4.3.10",
     "@types/koa-router": "^7.4.4",

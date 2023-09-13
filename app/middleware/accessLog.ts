@@ -1,4 +1,4 @@
-import { info } from "../utils/log4j";
+import { infoLog } from "../utils/log4j";
 const accessLog = async (ctx, next) => {
   const {
     path,
@@ -6,7 +6,7 @@ const accessLog = async (ctx, next) => {
     method,
   } = ctx;
   const content = `path:${path} | method:${method} | statusCode: ${statusCode}`;
-  info(content);
+  infoLog(content);
   return next();
 };
 export default accessLog;

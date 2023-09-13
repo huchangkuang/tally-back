@@ -12,27 +12,21 @@ const levels = {
 
 log4js.configure(config.log4js);
 
-const debug = (content: string) => {
+const debugLog = (content: string) => {
   let logger = log4js.getLogger();
   logger.level = levels.debug;
   logger.debug(content);
 };
 
-const sqlInfo = (content: string) => {
-  let logger = log4js.getLogger("sql");
-  logger.level = levels.info;
-  logger.info(content);
-};
-
-const info = (content: string) => {
+const infoLog = (content: string) => {
   let logger = log4js.getLogger("info");
   logger.level = levels.info;
   logger.info(content);
 };
 
-const error = (content: string) => {
+const errorLog = (content: string) => {
   let logger = log4js.getLogger("error");
   logger.level = levels.error;
   logger.error(content);
 };
-export { debug, info, error, sqlInfo };
+export { debugLog, infoLog, errorLog };
