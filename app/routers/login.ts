@@ -8,7 +8,7 @@ import { genPassword } from "../utils/genPassword";
 const routers = new Router();
 
 const sql = {
-  queryUser: `select idName, password from user;`,
+  queryUser: `select idName, password from users;`,
 };
 type UserAccount = { idName: string; password: string };
 
@@ -48,7 +48,7 @@ routers
       return;
     }
     await dbQuery(
-      `insert into user (idName, password) values ('${idName}', '${genPassword(
+      `insert into users (idName, password) values ('${idName}', '${genPassword(
         password,
       )}');`,
     );
