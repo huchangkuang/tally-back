@@ -3,6 +3,7 @@ import { dbQuery } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
 import { errorRule } from "../utils/errorRule";
 import { sign } from "../utils/jwtValidate";
+import { genPassword } from "../utils/genPassword";
 
 const routers = new Router();
 
@@ -14,13 +15,11 @@ type UserAccount = { idName: string; password: string };
 routers
   .post("/login", async (ctx) => {
     const { idName, password } = (ctx.request as any).body;
-    console.log(idName, password);
+    const md5pwd = genPassword(password);
     const res = await dbQuery<UserAccount[]>(sql.queryUser);
-    const valid = res.some(
-      (i) => i.idName === idName && i.password === password,
-    );
+    const valid = res.some((i) => i.idName === idName && i.password === md5pwd);
     if (valid) {
-      const token = sign({ idName: idName, password });
+      const token = sign({ idName: idName, password: md5pwd });
       ctx.body = successRes({ token });
       ctx.res.statusCode = 200;
     } else {
@@ -31,7 +30,7 @@ routers
           code: 10,
         },
         {
-          rule: res.find((i) => i.idName === idName)?.password !== password,
+          rule: res.find((i) => i.idName === idName)?.password !== md5pwd,
           msg: "密码错误",
           code: 20,
         },
@@ -49,7 +48,9 @@ routers
       return;
     }
     await dbQuery(
-      `insert into user (idName, password) values ('${idName}', '${password}');`,
+      `insert into user (idName, password) values ('${idName}', '${genPassword(
+        password,
+      )}');`,
     );
     ctx.body = successRes();
   });
