@@ -1,8 +1,8 @@
 import Router from "koa-router";
-import { dbQuery } from "../db/utils";
+import { dbQuery, objToSqlFields } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
 import { errorRule } from "../utils/errorRule";
-import { jwtSign } from "../utils/jwtValidate";
+import { getToken, jwtSign, jwtVerify } from "../utils/jwtValidate";
 import { genPassword } from "../utils/genPassword";
 
 const routers = new Router();
@@ -61,6 +61,37 @@ routers
       `insert into users (idName, password) values ('${idName}', '${genPassword(
         password,
       )}');`,
+    );
+    ctx.body = successRes();
+  })
+  .post("/editInfo", async (ctx) => {
+    const { userName, avatar } = (ctx.request as any).body;
+    if (!userName && !avatar) {
+      ctx.body = failRes("用户名或头像不能为空");
+      return;
+    }
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    await dbQuery(
+      `update users set ${objToSqlFields({
+        userName,
+        avatar,
+      })},updateAt=current_timestamp where id=${id};`,
+    );
+    ctx.body = successRes();
+  })
+  .post("/budget", async (ctx) => {
+    const { num } = (ctx.request as any).body;
+    if (!num) {
+      ctx.body = failRes("预算金额不能为空");
+      return;
+    }
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    await dbQuery(
+      `update users set ${objToSqlFields({
+        budget: Number(num),
+      })},updateAt=current_timestamp where id=${id};`,
     );
     ctx.body = successRes();
   });
