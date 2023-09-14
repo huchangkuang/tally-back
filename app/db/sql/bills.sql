@@ -4,6 +4,7 @@ create table if not exists bills (
    cash double,
    type int,
    tags text,
+   remark text,
    createAt timestamp default current_timestamp,
    updateAt timestamp default current_timestamp,
    primary key (id)

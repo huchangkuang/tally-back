@@ -21,7 +21,7 @@ routers
       return;
     }
     const token = getToken(ctx.header);
-    const { idName, id } = await jwtVerify(token);
+    const { id } = await jwtVerify(token);
     const tags = await dbQuery<{ name: string }[]>(
       `select name from tags where userId=${id} and name='${name}';`,
     );
@@ -29,32 +29,35 @@ routers
       ctx.body = failRes("标签名已存在");
       return;
     }
-    const users = await dbQuery<{ id: number }[]>(
-      `select id from users where idName='${idName}';`,
-    );
-    if (users.length) {
-      await dbQuery(
-        `insert into tags (name, userId) values ('${name}', ${users[0].id});`,
-      );
-      ctx.body = successRes();
-    }
+    await dbQuery(`insert into tags (name, userId) values ('${name}', ${id});`);
+    ctx.body = successRes();
   })
   .post("/update", async (ctx) => {
+    const token = getToken(ctx.header);
+    const { id: userId } = await jwtVerify(token);
     const { id, name } = (ctx.request as any).body;
     if (!id || !name) {
       ctx.body = failRes("id或name不能为空");
       return;
     }
-    await dbQuery(`update tags set name='${name}' where id=${Number(id)}`);
+    await dbQuery(
+      `update tags set name='${name}',updateAt=current_timestamp where id=${Number(
+        id,
+      )} and userId=${userId}`,
+    );
     ctx.body = successRes();
   })
-  .post("del", async (ctx) => {
+  .post("/del", async (ctx) => {
+    const token = getToken(ctx.header);
+    const { id: userId } = await jwtVerify(token);
     const { id } = (ctx.request as any).body;
     if (!id) {
       ctx.body = failRes("id不能为空");
       return;
     }
-    await dbQuery(`delete from tags where id=${Number(id)}`);
+    await dbQuery(
+      `delete from tags where id=${Number(id)} and userId=${userId}`,
+    );
     ctx.body = successRes();
   });
 

@@ -33,3 +33,9 @@ export const runSqlScript = (files: FileDirItem[]) => {
     }
   });
 };
+
+export const objToSqlFields = (obj: Record<string, any>) =>
+  Object.entries(obj)
+    .filter((i) => i !== undefined)
+    .map(([k, v]) => `${k}='${v}'`)
+    .join(",");
