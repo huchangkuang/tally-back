@@ -57,7 +57,7 @@ routers
       ctx.body = failRes("账单id不能为空");
       return;
     }
-    if (!cash && !name && !type && !tags.length && !remark) {
+    if (!cash && !name && !type && !tags && !remark) {
       ctx.body = failRes("至少修改一项账单内容");
       return;
     }
