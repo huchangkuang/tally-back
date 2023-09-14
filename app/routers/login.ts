@@ -10,6 +10,10 @@ const routers = new Router();
 routers
   .post("/login", async (ctx) => {
     const { idName, password } = (ctx.request as any).body;
+    if (!idName || !password) {
+      ctx.body = failRes("账号或密码不能为空");
+      return;
+    }
     const md5pwd = genPassword(password);
     const res = await dbQuery<{ id: number; password: string }[]>(
       `select id, password from users where idName='${idName}';`,
@@ -41,6 +45,10 @@ routers
   })
   .post("/signUp", async (ctx) => {
     const { idName, password } = (ctx.request as any).body;
+    if (!idName || !password) {
+      ctx.body = failRes("账号或密码不能为空");
+      return;
+    }
     const res = await dbQuery<{ idName: string }[]>(
       `select idName from users where idName='${idName}';`,
     );
