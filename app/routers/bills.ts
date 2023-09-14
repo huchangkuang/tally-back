@@ -1,7 +1,8 @@
 import Router from "koa-router";
-import { dbQuery, objToSqlFields } from "../db/utils";
+import { dbQuery, objToSqlFields, sqlTask } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
 import { getToken, jwtVerify } from "../utils/jwtValidate";
+import { arrDiff } from "../utils/arrDiff";
 
 const routers = new Router();
 
@@ -9,22 +10,31 @@ type BillItem = {
   id: number;
   name: string;
   userId: number;
-  tags: string;
   cash: number;
   type: number;
   createAt: string;
   updateAt: string;
   remark: string;
 };
+type TagItem = {
+  billId: number;
+  tagId: number;
+};
 routers
   .get("/list", async (ctx) => {
     const token = getToken(ctx.header);
     const { id } = await jwtVerify(token);
-    const bills = await dbQuery<BillItem[]>(
-      `select * from bills where userId=${id};`,
-    );
+    const [bills, tags] = await Promise.all([
+      dbQuery<BillItem[]>(`select * from bills where userId=${id};`),
+      dbQuery<TagItem[]>(
+        `select billId,tagId from billTags left join bills on billTags.billId=bills.id where userId=${id};`,
+      ),
+    ]);
     ctx.body = successRes(
-      bills.map((i) => ({ ...i, tags: JSON.parse(i.tags) })),
+      bills.map((i) => ({
+        ...i,
+        tags: tags.filter((j) => j.billId === i.id).map((t) => t.tagId),
+      })),
     );
   })
   .post("/add", async (ctx) => {
@@ -42,11 +52,19 @@ routers
     }
     const token = getToken(ctx.header);
     const { id } = await jwtVerify(token);
-    await dbQuery(
-      `insert into bills (userId,cash,type,tags,remark,name) values (${id},${Number(
-        cash,
-      )},${Number(type)},'${JSON.stringify(tags)}','${remark}','${name}');`,
-    );
+    const tagValues = tags.map((i) => `(last_insert_id(),${i})`).join(",");
+    await sqlTask(async () => {
+      await dbQuery(
+        `insert into bills (userId,cash,type,remark,name) values (${id},${Number(
+          cash,
+        )},${Number(type)},'${remark}','${name}');`,
+      );
+      if (tags.length) {
+        await dbQuery(
+          `insert into billTags (billId,tagId) values ${tagValues};`,
+        );
+      }
+    });
     ctx.body = successRes();
   })
   .post("/update", async (ctx) => {
@@ -61,17 +79,30 @@ routers
       ctx.body = failRes("至少修改一项账单内容");
       return;
     }
-    await dbQuery(
-      `update bills set ${objToSqlFields({
-        cash,
-        type,
-        tags,
-        remark,
-        name,
-      })},updateAt=current_timestamp where id=${Number(
-        id,
-      )} and userId=${userId}`,
-    );
+    await sqlTask(async () => {
+      await dbQuery(
+        `update bills set ${objToSqlFields({
+          cash,
+          type,
+          remark,
+          name,
+        })},updateAt=current_timestamp where id=${Number(
+          id,
+        )} and userId=${userId};`,
+      );
+      if (tags !== undefined) {
+        const preTags = await dbQuery<{ tagId: number }[]>(
+          `select tagId from billTags where billId=${id};`,
+        );
+        const { diff1, diff2 } = arrDiff(
+          preTags.map((i) => i.tagId),
+          tags,
+        );
+        await sqlTask(async () => {
+          // await dbQuery(`delete from billTags where tagId=${};`)
+        });
+      }
+    });
     ctx.body = successRes();
   })
   .post("/del", async (ctx) => {
@@ -82,9 +113,12 @@ routers
       ctx.body = failRes("id不能为空");
       return;
     }
-    await dbQuery(
-      `delete from bills where id=${Number(id)} and userId=${userId}`,
-    );
+    await sqlTask(async () => {
+      await dbQuery(
+        `delete from bills where id=${Number(id)} and userId=${userId};`,
+      );
+      await dbQuery(`delete from billTags where billId=${id};`);
+    });
     ctx.body = successRes();
   });
 

@@ -3,7 +3,6 @@ create table if not exists bills (
    userId int(11),
    cash double,
    type int,
-   tags text,
    remark text,
    createAt timestamp default current_timestamp,
    updateAt timestamp default current_timestamp,

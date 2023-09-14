@@ -39,3 +39,9 @@ export const objToSqlFields = (obj: Record<string, any>) =>
     .filter((i) => i !== undefined)
     .map(([k, v]) => `${k}='${v}'`)
     .join(",");
+
+export const sqlTask = async (fn: () => Promise<any>) => {
+  await dbQuery("begin;");
+  await fn();
+  await dbQuery("commit;");
+};

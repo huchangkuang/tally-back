@@ -1,5 +1,5 @@
 import Router from "koa-router";
-import { dbQuery } from "../db/utils";
+import { dbQuery, sqlTask } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
 import { getToken, jwtVerify } from "../utils/jwtValidate";
 
@@ -55,9 +55,12 @@ routers
       ctx.body = failRes("id不能为空");
       return;
     }
-    await dbQuery(
-      `delete from tags where id=${Number(id)} and userId=${userId}`,
-    );
+    await sqlTask(async () => {
+      await dbQuery(
+        `delete from tags where id=${Number(id)} and userId=${userId}`,
+      );
+      await dbQuery(`delete from billTags where tagId=${Number(id)};`);
+    });
     ctx.body = successRes();
   });
 
