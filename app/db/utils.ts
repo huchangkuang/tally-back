@@ -7,6 +7,7 @@ export const dbQuery = <T>(sql: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, connection) => {
       if (err) {
+        reject(err);
         errorLog(
           `errno:${err.errno}|path:${err.path}|code:${err.code}|message:${err.message}`,
         );

@@ -52,6 +52,15 @@ routers
     }
     const token = getToken(ctx.header);
     const { id } = await jwtVerify(token);
+    if (tags.length) {
+      const queryTags = await dbQuery<{ id: number }[]>(
+        `select id from tags where id in (${tags.join(",")});`,
+      );
+      if (tags.length !== queryTags.length) {
+        ctx.body = failRes("添加的标签不存在或已删除");
+        return;
+      }
+    }
     const tagValues = tags.map((i) => `(last_insert_id(),${i})`).join(",");
     await sqlTask(async () => {
       await dbQuery(
@@ -79,6 +88,15 @@ routers
     if (noUpdate && !tags) {
       ctx.body = failRes("至少修改一项账单内容");
       return;
+    }
+    if (tags.length) {
+      const queryTags = await dbQuery<{ id: number }[]>(
+        `select id from tags where id in (${tags.join(",")});`,
+      );
+      if (tags.length !== queryTags.length) {
+        ctx.body = failRes("修改的标签不存在或已删除");
+        return;
+      }
     }
     const fields = objToSqlFields({
       cash,
