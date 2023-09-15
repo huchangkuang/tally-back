@@ -37,7 +37,7 @@ export const runSqlScript = (files: FileDirItem[]) => {
 export const objToSqlFields = (obj: Record<string, any>) =>
   Object.entries(obj)
     .filter(([k, v]) => v !== undefined)
-    .map(([k, v]) => `${k}='${v}'`)
+    .map(([k, v]) => `${k}=${typeof v === "string" ? `'${v}'` : v}`)
     .join(",");
 
 export const sqlTask = async (fn: () => Promise<any>) => {
