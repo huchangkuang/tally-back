@@ -12,6 +12,7 @@ const needControlApi = [
   "/api/bills/del",
   "/api/user/editInfo",
   "/api/user/budget",
+  "/api/user/info",
 ];
 const authorityControl = async (ctx, next) => {
   const { path, header } = ctx;

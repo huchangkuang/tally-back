@@ -7,6 +7,14 @@ import { genPassword } from "../utils/genPassword";
 
 const routers = new Router();
 
+type UserInfo = {
+  id: number;
+  userName: string;
+  avatar: string;
+  password: string;
+  createAt: string;
+  updateAt: string;
+};
 routers
   .post("/login", async (ctx) => {
     const { idName, password } = (ctx.request as any).body;
@@ -15,17 +23,17 @@ routers
       return;
     }
     const md5pwd = genPassword(password);
-    const res = await dbQuery<{ id: number; password: string }[]>(
-      `select id, password from users where idName='${idName}';`,
+    const res = await dbQuery<UserInfo[]>(
+      `select * from users where idName='${idName}';`,
     );
     if (res.length) {
+      const { userName, id, avatar } = res[0];
       const token = jwtSign({
         idName: idName,
         password: md5pwd,
-        id: res[0].id,
+        id,
       });
-      ctx.body = successRes({ token });
-      ctx.res.statusCode = 200;
+      ctx.body = successRes({ token, userName, avatar });
     } else {
       const { msg, code } = errorRule([
         {
@@ -54,7 +62,6 @@ routers
     );
     if (res.length) {
       ctx.body = failRes("用户已注册");
-      ctx.res.statusCode = 200;
       return;
     }
     await dbQuery(
@@ -94,6 +101,19 @@ routers
       })},updateAt=current_timestamp where id=${id};`,
     );
     ctx.body = successRes();
+  })
+  .get("/info", async (ctx) => {
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    const res = await dbQuery<UserInfo[]>(
+      `select * from users where id='${id}';`,
+    );
+    if (res.length) {
+      const { userName, avatar, id } = res[0];
+      ctx.body = successRes({ userName, avatar, id });
+    } else {
+      ctx.body = failRes("找不到该用户信息");
+    }
   });
 
 export default routers;
