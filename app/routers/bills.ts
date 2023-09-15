@@ -75,21 +75,25 @@ routers
       ctx.body = failRes("账单id不能为空");
       return;
     }
-    if (!cash && !name && !type && !tags && !remark) {
+    const noUpdate = !cash && !name && !type && !remark;
+    if (noUpdate && !tags) {
       ctx.body = failRes("至少修改一项账单内容");
       return;
     }
+    const fields = objToSqlFields({
+      cash,
+      type,
+      remark,
+      name,
+    });
     await sqlTask(async () => {
-      await dbQuery(
-        `update bills set ${objToSqlFields({
-          cash,
-          type,
-          remark,
-          name,
-        })},updateAt=current_timestamp where id=${Number(
-          id,
-        )} and userId=${userId};`,
-      );
+      if (!noUpdate) {
+        await dbQuery(
+          `update bills set ${fields},updateAt=current_timestamp where id=${Number(
+            id,
+          )} and userId=${userId};`,
+        );
+      }
       if (tags !== undefined) {
         const preTags = await dbQuery<{ tagId: number }[]>(
           `select tagId from billTags where billId=${id};`,
@@ -98,8 +102,16 @@ routers
           preTags.map((i) => i.tagId),
           tags,
         );
+        const insertTagValues = diff2.map((i) => `(${id},${i})`).join(",");
         await sqlTask(async () => {
-          // await dbQuery(`delete from billTags where tagId=${};`)
+          await dbQuery(
+            `delete from billTags where tagId in (${diff1.join(
+              ",",
+            )}) and billId=${id};`,
+          );
+          await dbQuery(
+            `insert into billTags (billId, tagId) values ${insertTagValues};`,
+          );
         });
       }
     });
