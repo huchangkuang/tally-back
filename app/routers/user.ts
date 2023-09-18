@@ -1,16 +1,18 @@
 import Router from "koa-router";
-import { dbQuery, objToSqlFields } from "../db/utils";
+import { dbQuery, objToSqlFields, sqlTask } from "../db/utils";
 import { failRes, successRes } from "../utils/resBody";
-import { errorRule } from "../utils/errorRule";
 import { getToken, jwtSign, jwtVerify } from "../utils/jwtValidate";
 import { genPassword } from "../utils/genPassword";
+import { initTags } from "./tags";
 
 const routers = new Router();
 
 type UserInfo = {
   id: number;
+  idName: string;
   userName: string;
   avatar: string;
+  budget: number;
   password: string;
   createAt: string;
   updateAt: string;
@@ -57,11 +59,19 @@ routers
       ctx.body = failRes("用户已注册");
       return;
     }
-    await dbQuery(
-      `insert into users (idName, password) values ('${idName}', '${genPassword(
-        password,
-      )}');`,
-    );
+    await sqlTask(async () => {
+      await dbQuery(
+        `insert into users (idName, password) values ('${idName}', '${genPassword(
+          password,
+        )}');`,
+      );
+      const values = initTags.map(
+        (i) => `('${i.name}',${i.type},'${i.icon}',last_insert_id())`,
+      );
+      await dbQuery(
+        `insert into tags (name, type, icon, userId) values ${values}`,
+      );
+    });
     ctx.body = successRes();
   })
   .post("/editInfo", async (ctx) => {
@@ -102,8 +112,28 @@ routers
       `select * from users where id='${id}';`,
     );
     if (res.length) {
-      const { userName, avatar, id } = res[0];
-      ctx.body = successRes({ userName, avatar, id });
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth();
+      const startTime = `${year}-${(month + 1).toString().padStart(2, "0")}-01`;
+      const endTime = `${year}-${(month + 2).toString().padStart(2, "0")}-01`;
+      const [expenses, incomes] = await Promise.all([
+        dbQuery(
+          `select sum(bills.cash) as expense from bills where bills.createAt >= '${startTime}' and bills.createAt < '${endTime}' and bills.type=1;`,
+        ),
+        dbQuery(
+          `select sum(bills.cash) as income from bills where bills.createAt >= '${startTime}' and bills.createAt < '${endTime}' and bills.type=2;`,
+        ),
+      ]);
+      const { id, idName, userName, avatar, budget } = res[0];
+      ctx.body = successRes({
+        id,
+        idName,
+        userName,
+        avatar,
+        budget,
+        expense: expenses[0]?.expense ?? 0,
+        income: incomes[0]?.income,
+      });
     } else {
       ctx.body = failRes("找不到该用户信息");
     }

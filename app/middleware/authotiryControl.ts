@@ -14,20 +14,27 @@ const needControlApi = [
   "/api/user/budget",
   "/api/user/info",
 ];
+const tokenInvalid = (ctx) => {
+  ctx.body = failRes("登录失效", 401);
+  ctx.res.statusCode = 401;
+};
 const authorityControl = async (ctx, next) => {
   const { path, header } = ctx;
   if (needControlApi.includes(path)) {
     const token = getToken(header);
     if (!token) {
-      ctx.body = failRes("登录失效", 401);
-      ctx.res.statusCode = 401;
+      tokenInvalid(ctx);
       return;
     }
     try {
-      await jwtVerify(token);
+      const { exp } = await jwtVerify(token);
+      if (exp < Date.now().valueOf() / 1000) {
+        tokenInvalid(ctx);
+        return;
+      }
     } catch (e) {
-      ctx.body = failRes("登录失效", 401);
-      ctx.res.statusCode = 401;
+      tokenInvalid(ctx);
+      return;
     }
   }
   return next();

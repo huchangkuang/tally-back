@@ -44,10 +44,10 @@ routers
       type,
       tags = [],
       remark = "",
-      name,
+      time,
     } = (ctx.request as any).body;
     if (!cash || !type) {
-      ctx.body = failRes("名称|金额|类型不能为空");
+      ctx.body = failRes("金额|类型不能为空");
       return;
     }
     const token = getToken(ctx.header);
@@ -64,9 +64,11 @@ routers
     const tagValues = tags.map((i) => `(last_insert_id(),${i})`).join(",");
     await sqlTask(async () => {
       await dbQuery(
-        `insert into bills (userId,cash,type,remark,name) values (${id},${Number(
+        `insert into bills (userId,cash,type,remark,createAt) values (${id},${Number(
           cash,
-        )},${Number(type)},'${remark}','${name}');`,
+        )},${Number(type)},'${remark}', ${
+          time ? `'${time}'` : "current_timestamp"
+        });`,
       );
       if (tags.length) {
         await dbQuery(
@@ -79,12 +81,12 @@ routers
   .post("/update", async (ctx) => {
     const token = getToken(ctx.header);
     const { id: userId } = await jwtVerify(token);
-    const { cash, type, tags, remark, name, id } = (ctx.request as any).body;
+    const { cash, type, tags, remark, id, time } = (ctx.request as any).body;
     if (!id) {
       ctx.body = failRes("账单id不能为空");
       return;
     }
-    const noUpdate = !cash && !name && !type && !remark;
+    const noUpdate = !cash && !type && !remark;
     if (noUpdate && !tags) {
       ctx.body = failRes("至少修改一项账单内容");
       return;
@@ -102,7 +104,7 @@ routers
       cash,
       type,
       remark,
-      name,
+      time,
     });
     await sqlTask(async () => {
       if (!noUpdate) {
