@@ -50,7 +50,7 @@ routers
       return;
     }
     await dbQuery(
-      `insert into tags (name, userId, type, icon) values ('${name}', ${id}), ${type}, '${icon}';`,
+      `insert into tags (name, userId, type, icon) values ('${name}',${id},${type},'${icon}');`,
     );
     ctx.body = successRes();
   })
