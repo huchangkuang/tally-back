@@ -27,7 +27,12 @@ routers
       `select * from users where idName='${idName}';`,
     );
     if (res.length) {
-      const { userName, id, avatar } = res[0];
+      const { userName, id, avatar, password } = res[0];
+      if (password !== md5pwd) {
+        ctx.body = failRes("密码错误", 20);
+        ctx.res.statusCode = 500;
+        return;
+      }
       const token = jwtSign({
         idName: idName,
         password: md5pwd,
@@ -35,19 +40,7 @@ routers
       });
       ctx.body = successRes({ token, userName, avatar });
     } else {
-      const { msg, code } = errorRule([
-        {
-          rule: !res.length,
-          msg: "用户名不存在",
-          code: 10,
-        },
-        {
-          rule: res.length && res[0].password !== md5pwd,
-          msg: "密码错误",
-          code: 20,
-        },
-      ]);
-      ctx.body = failRes(msg, code);
+      ctx.body = failRes("用户名不存在", 10);
       ctx.res.statusCode = 500;
     }
   })

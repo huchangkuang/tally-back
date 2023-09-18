@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken";
 
 export const getToken = (header) => {
   const { authorization } = header;
-  return authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
+  return authorization?.startsWith("Bearer ")
+    ? authorization.slice(7)
+    : authorization;
 };
 
 export const jwtSign = (option: {
