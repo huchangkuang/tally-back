@@ -22,12 +22,37 @@ type TagItem = {
 };
 routers
   .get("/list", async (ctx) => {
+    // type: 1支出，收入;date: year,month,day
+    const { type, date } = ctx.request.query as Record<string, any>;
     const token = getToken(ctx.header);
     const { id } = await jwtVerify(token);
+    const filterType = type ? ` and bills.type=${Number(type)}` : "";
+    let filterDate = "";
+    if (date) {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth() + 1;
+      const day = new Date().getDate();
+      const dateMap = {
+        year: ` and bills.createAt >= '${year}-01-01'`,
+        month: ` and bills.createAt >= '${year}-${month
+          .toString()
+          .padStart(2, "0")}-01' and bills.createAt < '${year}-${(month + 1)
+          .toString()
+          .padStart(2, "0")}-01'`,
+        day: ` and bills.createAt >= '${year}-${month
+          .toString()
+          .padStart(2, "0")}-${day}' and bills.createAt < '${year}-${month
+          .toString()
+          .padStart(2, "0")}-${day + 1}'`,
+      };
+      filterDate = dateMap[date];
+    }
     const [bills, tags] = await Promise.all([
-      dbQuery<BillItem[]>(`select * from bills where userId=${id};`),
+      dbQuery<BillItem[]>(
+        `select * from bills where userId=${id}${filterType}${filterDate} order by bills.createAt DESC;`,
+      ),
       dbQuery<TagItem[]>(
-        `select billId,tagId from billTags left join bills on billTags.billId=bills.id where userId=${id};`,
+        `select billId,tagId from billTags left join bills on billTags.billId=bills.id where userId=${id}${filterType}${filterDate} order by bills.createAt DESC;`,
       ),
     ]);
     ctx.body = successRes(
