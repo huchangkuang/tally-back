@@ -33,15 +33,15 @@ routers
       const month = new Date().getMonth() + 1;
       const day = new Date().getDate();
       const dateMap = {
-        year: ` and bills.createAt >= '${year}-01-01'`,
-        month: ` and bills.createAt >= '${year}-${month
+        year: ` and bills.date >= '${year}-01-01'`,
+        month: ` and bills.date >= '${year}-${month
           .toString()
-          .padStart(2, "0")}-01' and bills.createAt < '${year}-${(month + 1)
+          .padStart(2, "0")}-01' and bills.date < '${year}-${(month + 1)
           .toString()
           .padStart(2, "0")}-01'`,
-        day: ` and bills.createAt >= '${year}-${month
+        day: ` and bills.date >= '${year}-${month
           .toString()
-          .padStart(2, "0")}-${day}' and bills.createAt < '${year}-${month
+          .padStart(2, "0")}-${day}' and bills.date < '${year}-${month
           .toString()
           .padStart(2, "0")}-${day + 1}'`,
       };
@@ -49,10 +49,10 @@ routers
     }
     const [bills, tags] = await Promise.all([
       dbQuery<BillItem[]>(
-        `select * from bills where userId=${id}${filterType}${filterDate} order by bills.createAt DESC;`,
+        `select * from bills where userId=${id}${filterType}${filterDate} order by bills.date DESC;`,
       ),
       dbQuery<TagItem[]>(
-        `select billId,tagId from billTags left join bills on billTags.billId=bills.id where userId=${id}${filterType}${filterDate} order by bills.createAt DESC;`,
+        `select billId,tagId from billTags left join bills on billTags.billId=bills.id where userId=${id}${filterType}${filterDate} order by bills.date DESC;`,
       ),
     ]);
     ctx.body = successRes(
@@ -69,7 +69,7 @@ routers
       type,
       tags = [],
       remark = "",
-      time,
+      date,
     } = (ctx.request as any).body;
     if (!cash || !type) {
       ctx.body = failRes("金额|类型不能为空");
@@ -89,11 +89,9 @@ routers
     const tagValues = tags.map((i) => `(last_insert_id(),${i})`).join(",");
     await sqlTask(async () => {
       await dbQuery(
-        `insert into bills (userId,cash,type,remark,createAt) values (${id},${Number(
+        `insert into bills (userId,cash,type,remark,date) values (${id},${Number(
           cash,
-        )},${Number(type)},'${remark}', ${
-          time ? `'${time}'` : "current_timestamp"
-        });`,
+        )},${Number(type)},'${remark}', ${date ? `'${date}'` : ""});`,
       );
       if (tags.length) {
         await dbQuery(
@@ -106,12 +104,12 @@ routers
   .post("/update", async (ctx) => {
     const token = getToken(ctx.header);
     const { id: userId } = await jwtVerify(token);
-    const { cash, type, tags, remark, id, time } = (ctx.request as any).body;
+    const { cash, type, tags, remark, id, date } = (ctx.request as any).body;
     if (!id) {
       ctx.body = failRes("账单id不能为空");
       return;
     }
-    const noUpdate = !cash && !type && !remark;
+    const noUpdate = !cash && !type && !remark && !date;
     if (noUpdate && !tags) {
       ctx.body = failRes("至少修改一项账单内容");
       return;
@@ -129,7 +127,7 @@ routers
       cash,
       type,
       remark,
-      time,
+      date,
     });
     await sqlTask(async () => {
       if (!noUpdate) {
