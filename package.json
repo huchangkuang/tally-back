@@ -23,6 +23,7 @@
   },
   "jest": {},
   "dependencies": {
+    "dayjs": "^1.11.9",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",

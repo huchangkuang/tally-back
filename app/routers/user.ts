@@ -4,6 +4,7 @@ import { failRes, successRes } from "../utils/resBody";
 import { getToken, jwtSign, jwtVerify } from "../utils/jwtValidate";
 import { genPassword } from "../utils/genPassword";
 import { initTags } from "./tags";
+import dayjs from "dayjs";
 
 const routers = new Router();
 
@@ -116,15 +117,21 @@ routers
       const month = new Date().getMonth();
       const startTime = `${year}-${(month + 1).toString().padStart(2, "0")}-01`;
       const endTime = `${year}-${(month + 2).toString().padStart(2, "0")}-01`;
-      const [expenses, incomes] = await Promise.all([
+      const [expenses, incomes, reports, billDates] = await Promise.all([
         dbQuery(
           `select sum(bills.cash) as expense from bills where bills.createAt >= '${startTime}' and bills.createAt < '${endTime}' and bills.type=1;`,
         ),
         dbQuery(
           `select sum(bills.cash) as income from bills where bills.createAt >= '${startTime}' and bills.createAt < '${endTime}' and bills.type=2;`,
         ),
+        dbQuery(
+          `select count(reportDate) as reportNum,max(reportDate) as reportDate from userReports where userId=${id};`,
+        ),
+        dbQuery(
+          `select count(*) as recordNum from bills where userId=${id} group by date;`,
+        ),
       ]);
-      const { id, idName, userName, avatar, budget } = res[0];
+      const { idName, userName, avatar, budget } = res[0];
       ctx.body = successRes({
         id,
         idName,
@@ -133,10 +140,32 @@ routers
         budget,
         expense: expenses[0]?.expense ?? 0,
         income: incomes[0]?.income,
+        reportNum: reports[0]?.reportNum ?? 0,
+        reportDate: reports[0]?.reportDate ?? "",
+        billsNum: (billDates as { recordNum: number }[]).reduce(
+          (sum, i) => sum + i.recordNum,
+          0,
+        ),
       });
     } else {
       ctx.body = failRes("找不到该用户信息");
     }
+  })
+  .post("/report", async (ctx) => {
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    const date = dayjs().format("YYYY-MM-DD");
+    const res = await dbQuery<{ reportDate: string }[]>(
+      `select max(reportDate) as reportDate from userReports where userId=${id};`,
+    );
+    if (res.length && dayjs(res[0].reportDate).format("YYYY-MM-DD") === date) {
+      ctx.body = failRes("当日已经打过卡了");
+      return;
+    }
+    await dbQuery(
+      `insert into userReports (userId, reportDate) values (${id},'${date}');`,
+    );
+    ctx.body = successRes();
   });
 
 export default routers;

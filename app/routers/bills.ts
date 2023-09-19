@@ -30,20 +30,20 @@ routers
     let filterDate = "";
     if (date) {
       const year = new Date().getFullYear();
-      const month = new Date().getMonth() + 1;
-      const day = new Date().getDate();
+      const month = (new Date().getMonth() + 1).toString().padStart(2, "0");
+      const day = new Date().getDate().toString().padStart(2, "0");
       const dateMap = {
         year: ` and bills.date >= '${year}-01-01'`,
-        month: ` and bills.date >= '${year}-${month
-          .toString()
-          .padStart(2, "0")}-01' and bills.date < '${year}-${(month + 1)
+        month: ` and bills.date >= '${year}-${month}-01' and bills.date < '${year}-${(
+          Number(month) + 1
+        )
           .toString()
           .padStart(2, "0")}-01'`,
-        day: ` and bills.date >= '${year}-${month
+        day: ` and bills.date >= '${year}-${month}-${day}' and bills.date < '${year}-${month}-${(
+          Number(day) + 1
+        )
           .toString()
-          .padStart(2, "0")}-${day}' and bills.date < '${year}-${month
-          .toString()
-          .padStart(2, "0")}-${day + 1}'`,
+          .padStart(2, "0")}'`,
       };
       filterDate = dateMap[date];
     }

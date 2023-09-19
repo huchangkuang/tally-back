@@ -13,6 +13,7 @@ const needControlApi = [
   "/api/user/editInfo",
   "/api/user/budget",
   "/api/user/info",
+  "/api/user/report",
 ];
 const tokenInvalid = (ctx) => {
   ctx.body = failRes("登录失效", 401);
