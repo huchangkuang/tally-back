@@ -9,16 +9,20 @@ describe("login", () => {
   it("test", function () {
     expect(1 + 1).toEqual(2);
   });
-  // let app: Server;
-  // beforeAll((done) => {
-  //   app = run(config.serverPort);
-  //   done();
-  // });
-  // it("post /api/user/login", async () => {
-  //   await request(app).post("/api/user/login").expect(200).expect((res) => {
-  //     expect(res.body.code).toEqual(0)
-  //   });
-  // });
+  let app: Server;
+  beforeAll((done) => {
+    app = run(config.serverPort);
+    done();
+  });
+  it("post /api/user/login", async () => {
+    await request(app)
+      .post("/api/user/login")
+      .send({ idName: "qingzhou", password: 123456 })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.code).toEqual(0);
+      });
+  });
   // it("post /api/user/signUp", async () => {
   //   await request(app)
   //     .post("/api/user/signUp")
@@ -27,8 +31,8 @@ describe("login", () => {
   //       console.log(res.body.code);
   //     });
   // });
-  // afterAll((done) => {
-  //   app.close();
-  //   done();
-  // });
+  afterAll((done) => {
+    app.close();
+    done();
+  });
 });
