@@ -1,4 +1,4 @@
-import { arrDiff } from "../../utils/arrDiff";
+import { arrDiff } from "../utils/arrDiff";
 
 describe("arrDiff", () => {
   it("diff arr1", function () {

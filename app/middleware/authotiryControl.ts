@@ -14,6 +14,7 @@ const needControlApi = [
   "/api/user/budget",
   "/api/user/info",
   "/api/user/report",
+  "/api/user/loginOut",
 ];
 const tokenInvalid = (ctx) => {
   ctx.body = failRes("登录失效", 401);

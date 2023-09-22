@@ -166,6 +166,27 @@ routers
       `insert into userReports (userId, reportDate) values (${id},'${date}');`,
     );
     ctx.body = successRes();
+  })
+  .post("/loginOut", async (ctx) => {
+    const token = getToken(ctx.header);
+    const { id } = await jwtVerify(token);
+    await sqlTask(async () => {
+      await dbQuery(`delete from users where id=${id};`);
+      await dbQuery(`delete from bills where userId=${id};`);
+      const res = await dbQuery<{ id: number }[]>(
+        `select id from tags where userId=${id};`,
+      );
+      await dbQuery(`delete from tags where userId=${id};`);
+      if (res.length) {
+        await dbQuery(
+          `delete from billTags where tagId in (${res
+            .map((i) => i.id)
+            .join(",")});`,
+        );
+      }
+      await dbQuery(`delete from userReports where userId=${id};`);
+    });
+    ctx.body = successRes();
   });
 
 export default routers;

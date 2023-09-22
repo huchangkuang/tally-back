@@ -1,4 +1,4 @@
-import { objToSqlFields } from "../../db/utils";
+import { objToSqlFields } from "../db/utils";
 
 describe("objToSqlFields", () => {
   it("should filter undefined", function () {
