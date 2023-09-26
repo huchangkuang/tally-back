@@ -1,10 +1,10 @@
-create table if not exists tags (
-   id int(11) NOT NULL AUTO_INCREMENT,
-   userId int(11),
-   name text,
-   type int,
-   icon text,
-   createAt timestamp default current_timestamp,
-   updateAt timestamp default current_timestamp,
-   primary key (id)
+CREATE TABLE IF NOT EXISTS tags (
+   id INT(11) NOT NULL AUTO_INCREMENT,
+   userId INT(11),
+   name TEXT,
+   type INT,
+   icon TEXT,
+   createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,8 +1,8 @@
-create table if not exists billTags (
-     id int(11) NOT NULL AUTO_INCREMENT,
-     billId int(11),
-     tagId int(11),
-     createAt timestamp default current_timestamp,
-     updateAt timestamp default current_timestamp,
-     primary key (id)
+CREATE TABLE IF NOT EXISTS billTags (
+     id INT(11) NOT NULL AUTO_INCREMENT,
+     billId INT(11),
+     tagId INT(11),
+     createAt TIMESTAMP Default CURRENT_TIMESTAMP,
+     updateAt TIMESTAMP Default CURRENT_TIMESTAMP,
+     PRIMARY KEY (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

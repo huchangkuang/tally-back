@@ -1,11 +1,11 @@
-create table if not exists bills (
-   id int(11) NOT NULL AUTO_INCREMENT,
-   userId int(11),
-   cash double,
-   type int,
-   date date,
-   remark text,
-   createAt timestamp default current_timestamp,
-   updateAt timestamp default current_timestamp,
-   primary key (id)
+CREATE TABLE IF NOT EXISTS bills (
+   id INT(11) NOT NULL AUTO_INCREMENT,
+   userId INT(11),
+   cash DOUBLE,
+   type INT,
+   date DATE,
+   remark TEXT,
+   createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
