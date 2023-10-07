@@ -5,3 +5,4 @@ node_modules
 logs
 /.env
 /app/static/
+/data/
