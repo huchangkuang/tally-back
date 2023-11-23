@@ -1,5 +1,5 @@
 const config = {
-  serverPort: 39005,
+  serverPort: process.env.SERVER_PORT,
   db: {
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
